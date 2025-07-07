@@ -754,6 +754,7 @@ const EventForm = ({ onSubmit, onCancel }) => {
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     className="p-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                    required
                 />
                 <input
                     type="time"
