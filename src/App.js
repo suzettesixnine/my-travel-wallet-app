@@ -6,9 +6,8 @@ import { getFirestore, doc, addDoc, updateDoc, deleteDoc, onSnapshot, collection
 // Context for Firebase and User
 const FirebaseContext = createContext(null);
 
-// YOUR ACTUAL FIREBASE CONFIGURATION
-// This has been updated with the details you provided.
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIGURATION
+// Get this from your Firebase project settings (Project settings -> General -> Your apps -> Firebase SDK snippet -> Config)
 const firebaseConfig = {
   apiKey: "AIzaSyCUK6qSrSoH2IaEX0Wot6SFTNaor5JPU1k",
   authDomain: "my-travel-app-final-327bc.firebaseapp.com",
@@ -18,9 +17,10 @@ const firebaseConfig = {
   appId: "1:689797792098:web:5a591130050a74fedf6c3b",
   measurementId: "G-0SV0DZZNVN"
 };
-// Your Firebase Project ID
-const APP_ID_FOR_DEPLOYMENT = "my-travel-app-final-327bc
-";
+
+// IMPORTANT: REPLACE THIS WITH YOUR ACTUAL FIREBASE PROJECT ID
+// This is the Project ID from your Firebase Console (e.g., "my-travel-app-final-xxxx")
+const APP_ID_FOR_DEPLOYMENT = "my-travel-app-final-327bc";
 
 
 // Firebase Configuration and Initialization
@@ -420,12 +420,12 @@ const App = () => {
 const formatDateTimeForGoogleCalendar = (date, time) => {
     if (!date) return '';
     const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // Ensure date is YYYY-MM-DD and time is HH:MM
+    // Ensure date is يَسْقُطُ-MM-DD and time is HH:MM
     const dateTimeString = `${date}T${time || '00:00'}:00`;
     // Construct ISO string for the local time, then extract parts for Google Calendar
     const localDate = new Date(dateTimeString);
 
-    // Google Calendar expects YYYYMMDDTHHMMSS (for local time) or YYYYMMDDTHHMMSSZ (for UTC)
+    // Google Calendar expects يَسْقُطُMMDDTHHMMSS (for local time) or يَسْقُطُMMDDTHHMMSSZ (for UTC)
     // To be safe and explicit, let's format it as local time with the timezone parameter.
     const year = localDate.getFullYear();
     const month = String(localDate.getMonth() + 1).padStart(2, '0');
