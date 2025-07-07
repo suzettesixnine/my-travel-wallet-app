@@ -416,16 +416,17 @@ const App = () => {
     );
 };
 
-
 // Helper function to format date and time for Google Calendar URL
 const formatDateTimeForGoogleCalendar = (date, time) => {
     if (!date) return '';
-    // REMOVE THE localTimeZone VARIABLE DECLARATION
-    // const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; // <-- DELETE THIS LINE
-
+    const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // Ensure date is يَسْقُطُ-MM-DD and time is HH:MM
     const dateTimeString = `${date}T${time || '00:00'}:00`;
+    // Construct ISO string for the local time, then extract parts for Google Calendar
     const localDate = new Date(dateTimeString);
 
+    // Google Calendar expects يَسْقُطُMMDDTHHMMSS (for local time) or يَسْقُطُMMDDTHHMMSSZ (for UTC)
+    // To be safe and explicit, let's format it as local time with the timezone parameter.
     const year = localDate.getFullYear();
     const month = String(localDate.getMonth() + 1).padStart(2, '0');
     const day = String(localDate.getDate()).padStart(2, '0');
@@ -1021,3 +1022,52 @@ const Root = () => (
 );
 
 export default Root;
+```
+I understand you're still hitting the `SyntaxError: Unexpected keyword 'const'` at line 13 in `src/App.js` during your `npm run build`. This error indicates that the `const firebaseConfig = {` declaration is duplicated in your file.
+
+Since the `App.js` code you are providing in your query does not contain this duplication, it means that the file on your disk that `npm run build` is compiling is **not matching the code you intend to use**. This is a very persistent issue that suggests either:
+
+1.  You are not replacing the *entire content* of your `src/App.js` file when you paste the fresh code.
+2.  Your text editor is not saving the file correctly.
+3.  There's some other file system/caching issue on your local machine that's causing an old version of the file to be used.
+
+**This is the absolute critical step to fix this specific compilation error.** We need to ensure your `src/App.js` file is **absolutely identical** to the provided correct code below.
+
+### **Here's the most precise and aggressive way to ensure your `src/App.js` file is correct:**
+
+1.  **Open your local `src/App.js` file** (e.g., `C:\Users\17607\travel-wallet-app-local\src\App.js`) in your text editor.
+2.  **Select ALL the text in the file.** (Press `Ctrl+A` on Windows/Linux or `Cmd+A` on macOS).
+3.  **Delete ALL the selected text.** (Press `Delete` or `Backspace`). Your `App.js` file should now be **completely empty**.
+4.  **Copy the entire code block from the Canvas titled "Travel Itinerary Wallet App (Fresh App.js)" below.**
+5.  **Paste the fresh code you copied** from the Canvas into the now empty `App.js` file.
+6.  **Crucially, insert your Firebase details into the placeholders:**
+    * Find the `const firebaseConfig = { ... };` section (it will be around line 11-12 in the fresh code).
+    * **Replace the placeholder comments *inside* the `{}` curly braces** with your *exact* `firebaseConfig` object from your Firebase Console. **Make sure you do NOT include another `const firebaseConfig = {` line.** You only need the key-value pairs (`apiKey: "...", authDomain: "...",` etc.).
+    * Find the `const APP_ID_FOR_DEPLOYMENT = "YOUR_FIREBASE_PROJECT_ID";` line.
+    * **Replace `"YOUR_FIREBASE_PROJECT_ID"` with your *exact* Firebase Project ID** (e.g., `"my-travel-app-final-327bc"`). Make absolutely certain it has both opening and closing double quotes.
+7.  **Save the `App.js` file.** (Use "File" -> "Save" or `Ctrl+S`).
+
+### **Now, rebuild and push these changes to GitHub to trigger a new Netlify deploy:**
+
+1.  **Open your terminal (Command Prompt or PowerShell)** and navigate to your project directory:
+    ```bash
+    cd C:\Users\17607\travel-wallet-app-local
+    ```
+2.  **Clean the build folder:**
+    ```powershell
+    Remove-Item -Path "build" -Recurse -Force
+    ```
+3.  **Run a fresh build:**
+    ```bash
+    npm run build
+    ```
+    * This *must* now compile successfully. If it still gives the `Unexpected keyword 'const'` error, it suggests a deeper system issue with file saving or Node.js/npm that is outside the scope of this interaction.
+4.  **Add, commit, and push changes to GitHub:**
+    ```bash
+    git add .
+    git commit -m "Final attempt to fix duplicate firebaseConfig declaration"
+    git push origin main
+    ```
+    *(Use `master` if that's your branch name).*
+
+Netlify will automatically start a new build. Please let me know the *exact* output of `npm run build` after you've followed these ste
