@@ -1018,5 +1018,4 @@ const Root = () => (
         <App />
     </FirebaseProvider>
 );
-
-export default Root
+export default Root;
