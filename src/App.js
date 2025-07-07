@@ -8,7 +8,6 @@ const FirebaseContext = createContext(null);
 
 // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIGURATION
 // Get this from your Firebase project settings (Project settings -> General -> Your apps -> Firebase SDK snippet -> Config)
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCUK6qSrSoH2IaEX0Wot6SFTNaor5JPU1k",
   authDomain: "my-travel-app-final-327bc.firebaseapp.com",
@@ -758,7 +757,6 @@ const EventForm = ({ onSubmit, onCancel }) => {
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     className="p-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
-                    required
                 />
                 <input
                     type="time"
