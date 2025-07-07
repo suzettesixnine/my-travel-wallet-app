@@ -21,7 +21,7 @@ const firebaseConfig = {
 
 // IMPORTANT: REPLACE THIS WITH YOUR ACTUAL FIREBASE PROJECT ID
 // This is the Project ID from your Firebase Console (e.g., "my-travel-app-final-xxxx")
-const APP_ID_FOR_DEPLOYMENT = "my-travel-app-final-327bc";
+const APP_ID_FOR_DEPLOYMENT ="my-travel-app-final-327bc";
 
 
 // Firebase Configuration and Initialization
