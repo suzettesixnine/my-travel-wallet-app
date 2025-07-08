@@ -7,6 +7,7 @@ import { getFirestore, doc, addDoc, updateDoc, deleteDoc, onSnapshot, collection
 const FirebaseContext = createContext(null);
 
 // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIGURATION
+// Get this from your Firebase project settings (Project settings -> General -> Your apps -> Firebase SDK snippet -> Config)
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCUK6qSrSoH2IaEX0Wot6SFTNaor5JPU1k",
@@ -18,7 +19,9 @@ const firebaseConfig = {
   measurementId: "G-0SV0DZZNVN"
 };
 
-const APP_ID_FOR_DEPLOYMENT ="my-travel-app-final-327bc";
+// IMPORTANT: REPLACE THIS WITH YOUR ACTUAL FIREBASE PROJECT ID
+// This is the Project ID from your Firebase Console (e.g., "my-travel-app-final-xxxx")
+const APP_ID_FOR_DEPLOYMENT = "my-travel-app-final-327bc";
 
 
 // Firebase Configuration and Initialization
@@ -349,18 +352,18 @@ const App = () => {
                     <div className="flex flex-col sm:flex-row gap-3 mb-4">
                         <button
                             onClick={handlePublishItinerary}
-                            className="flex-grow px-6 py-3 bg-slate-800 text-white font-semibold rounded-full shadow-lg hover:bg-slate-900 transition duration-300 ease-in-out transform hover:-translate-y-1"
+                            className="flex items-center justify-center px-6 py-3 bg-slate-800 text-white font-semibold rounded-full shadow-lg hover:bg-slate-900 transition duration-300 ease-in-out transform hover:-translate-y-1"
                             disabled={viewingShared}
                         >
-                            <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.882 12.682 9 12 9 12s.118-.682.316-1.342m0 2.684a3 3 0 100-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 0a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path></svg>
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.882 12.682 9 12 9 12s.118-.682.316-1.342m0 2.684a3 3 0 100-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 0a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path></svg>
                             Publish My Current Itinerary
                         </button>
                         <button
                             onClick={handleViewMyItinerary}
-                            className="flex-grow px-6 py-3 bg-slate-700 text-white font-semibold rounded-full shadow-lg hover:bg-slate-800 transition duration-300 ease-in-out transform hover:-translate-y-1"
+                            className="flex items-center justify-center px-6 py-3 bg-slate-700 text-white font-semibold rounded-full shadow-lg hover:bg-slate-800 transition duration-300 ease-in-out transform hover:-translate-y-1"
                             disabled={!viewingShared}
                         >
-                            <svg className="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                             View My Itinerary
                         </button>
                     </div>
