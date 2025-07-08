@@ -7,7 +7,6 @@ import { getFirestore, doc, addDoc, updateDoc, deleteDoc, onSnapshot, collection
 const FirebaseContext = createContext(null);
 
 // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE CONFIGURATION
-// Get this from your Firebase project settings (Project settings -> General -> Your apps -> Firebase SDK snippet -> Config)
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyCUK6qSrSoH2IaEX0Wot6SFTNaor5JPU1k",
@@ -19,8 +18,6 @@ const firebaseConfig = {
   measurementId: "G-0SV0DZZNVN"
 };
 
-// IMPORTANT: REPLACE THIS WITH YOUR ACTUAL FIREBASE PROJECT ID
-// This is the Project ID from your Firebase Console (e.g., "my-travel-app-final-xxxx")
 const APP_ID_FOR_DEPLOYMENT ="my-travel-app-final-327bc";
 
 
@@ -417,21 +414,15 @@ const App = () => {
     );
 };
 
-// Helper function to format date and time for Google Calendar URL
-const formatDateTimeForGoogleCalendar = (date, time) => {
+// Helper function to format date and time for ICS
+const formatDateTimeForICS = (date, time) => {
     if (!date) return '';
-    // const localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; // Removed unused variable
     const dateTimeString = `${date}T${time || '00:00'}:00`;
     const localDate = new Date(dateTimeString);
 
-    const year = localDate.getFullYear();
-    const month = String(localDate.getMonth() + 1).padStart(2, '0');
-    const day = String(localDate.getDate()).padStart(2, '0');
-    const hours = String(localDate.getHours()).padStart(2, '0');
-    const minutes = String(localDate.getMinutes()).padStart(2, '0');
-    const seconds = String(localDate.getSeconds()).padStart(2, '0');
-
-    return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+    // Format to UTC string and remove non-numeric characters for ICS DTSTART/DTEND
+    // Example: 20250707T180000Z
+    return localDate.toISOString().replace(/[-:]|\.\d{3}/g, '');
 };
 
 // Form Components
@@ -731,6 +722,7 @@ const EventForm = ({ onSubmit, onCancel }) => {
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className="p-3 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                    required
                 />
                 <input
                     type="date"
@@ -800,17 +792,23 @@ const EventForm = ({ onSubmit, onCancel }) => {
 // Display Card Components
 const FlightCard = ({ flight, onDelete, viewingShared }) => {
     const handleAddToCalendar = () => {
-        const startDateFormatted = formatDateTimeForGoogleCalendar(flight.departureDate, flight.departureTime);
-        const endDateFormatted = formatDateTimeForGoogleCalendar(flight.departureDate, flight.arrivalTime); // Assuming arrival on same day
-        const title = encodeURIComponent(`${flight.airline} Flight ${flight.flightNumber}`);
-        const details = encodeURIComponent(
-            `From: ${flight.departureAirport}\nTo: ${flight.arrivalAirport}\nNotes: ${flight.notes || 'N/A'}\n\nConfirmation: (Add manually if needed)`
-        );
-        const location = encodeURIComponent(`${flight.departureAirport} to ${flight.arrivalAirport}`);
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const startDateFormatted = formatDateTimeForICS(flight.departureDate, flight.departureTime);
+        const endDateFormatted = formatDateTimeForICS(flight.departureDate, flight.arrivalTime); // Assuming arrival on same day
+        const title = `${flight.airline} Flight ${flight.flightNumber}`;
+        const description = `From: ${flight.departureAirport}\\nTo: ${flight.arrivalAirport}\\nNotes: ${flight.notes || 'N/A'}\\nWebsite: ${flight.website || 'N/A'}`;
+        const location = `${flight.departureAirport} to ${flight.arrivalAirport}`;
 
-        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateFormatted}/${endDateFormatted}&details=${details}&location=${location}&ctz=${encodeURIComponent(timeZone)}`;
-        window.open(googleCalendarUrl, '_blank');
+        const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//MyTravelWallet//NONSGML v1.0//EN\nBEGIN:VEVENT\nUID:${Date.now()}@mytravelwallet.app\nDTSTAMP:${formatDateTimeForICS(new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[1].substring(0, 5))}\nDTSTART:${startDateFormatted}\nDTEND:${endDateFormatted}\nSUMMARY:${title}\nDESCRIPTION:${description}\nLOCATION:${location}\nEND:VEVENT\nEND:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`; // Sanitize filename
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -848,7 +846,7 @@ const FlightCard = ({ flight, onDelete, viewingShared }) => {
                         onClick={handleAddToCalendar}
                         className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 transition duration-300"
                     >
-                        Add to Calendar
+                        Download to Calendar
                     </button>
                 )}
                 {!viewingShared && (
@@ -866,17 +864,23 @@ const FlightCard = ({ flight, onDelete, viewingShared }) => {
 
 const CarRentalCard = ({ carRental, onDelete, viewingShared }) => {
     const handleAddToCalendar = () => {
-        const startDateFormatted = formatDateTimeForGoogleCalendar(carRental.pickupDate, carRental.pickupTime);
-        const endDateFormatted = formatDateTimeForGoogleCalendar(carRental.returnDate, carRental.returnTime);
-        const title = encodeURIComponent(`${carRental.company} Car Rental`);
-        const details = encodeURIComponent(
-            `Confirmation: ${carRental.confirmationNumber}\nPickup: ${carRental.pickupLocation}\nReturn: ${carRental.returnLocation}\nNotes: ${carRental.notes || 'N/A'}`
-        );
-        const location = encodeURIComponent(carRental.pickupLocation);
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const startDateFormatted = formatDateTimeForICS(carRental.pickupDate, carRental.pickupTime);
+        const endDateFormatted = formatDateTimeForICS(carRental.returnDate, carRental.returnTime);
+        const title = `${carRental.company} Car Rental`;
+        const description = `Confirmation: ${carRental.confirmationNumber}\\nPickup: ${carRental.pickupLocation}\\nReturn: ${carRental.returnLocation}\\nNotes: ${carRental.notes || 'N/A'}\\nWebsite: ${carRental.website || 'N/A'}`;
+        const location = carRental.pickupLocation;
 
-        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateFormatted}/${endDateFormatted}&details=${details}&location=${location}&ctz=${encodeURIComponent(timeZone)}`;
-        window.open(googleCalendarUrl, '_blank');
+        const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//MyTravelWallet//NONSGML v1.0//EN\nBEGIN:VEVENT\nUID:${Date.now()}@mytravelwallet.app\nDTSTAMP:${formatDateTimeForICS(new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[1].substring(0, 5))}\nDTSTART:${startDateFormatted}\nDTEND:${endDateFormatted}\nSUMMARY:${title}\nDESCRIPTION:${description}\nLOCATION:${location}\nEND:VEVENT\nEND:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -912,7 +916,7 @@ const CarRentalCard = ({ carRental, onDelete, viewingShared }) => {
                         onClick={handleAddToCalendar}
                         className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 transition duration-300"
                     >
-                        Add to Calendar
+                        Download to Calendar
                     </button>
                 )}
                 {!viewingShared && (
@@ -930,15 +934,23 @@ const CarRentalCard = ({ carRental, onDelete, viewingShared }) => {
 
 const EventCard = ({ event, onDelete, viewingShared }) => {
     const handleAddToCalendar = () => {
-        const startDateFormatted = formatDateTimeForGoogleCalendar(event.startDate, event.startTime);
-        const endDateFormatted = formatDateTimeForGoogleCalendar(event.endDate || event.startDate, event.endTime || event.startTime);
-        const title = encodeURIComponent(event.title);
-        const details = encodeURIComponent(event.notes || '');
-        const location = encodeURIComponent(event.location || '');
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const startDateFormatted = formatDateTimeForICS(event.startDate, event.startTime);
+        const endDateFormatted = formatDateTimeForICS(event.endDate || event.startDate, event.endTime || event.startTime);
+        const title = event.title;
+        const description = `Notes: ${event.notes || 'N/A'}\\nWebsite: ${event.website || 'N/A'}`;
+        const location = event.location || 'N/A';
 
-        const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startDateFormatted}/${endDateFormatted}&details=${details}&location=${location}&ctz=${encodeURIComponent(timeZone)}`;
-        window.open(googleCalendarUrl, '_blank');
+        const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//MyTravelWallet//NONSGML v1.0//EN\nBEGIN:VEVENT\nUID:${Date.now()}@mytravelwallet.app\nDTSTAMP:${formatDateTimeForICS(new Date().toISOString().split('T')[0], new Date().toISOString().split('T')[1].substring(0, 5))}\nDTSTART:${startDateFormatted}\nDTEND:${endDateFormatted}\nSUMMARY:${title}\nDESCRIPTION:${description}\nLOCATION:${location}\nEND:VEVENT\nEND:VCALENDAR`;
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -973,7 +985,7 @@ const EventCard = ({ event, onDelete, viewingShared }) => {
                         onClick={handleAddToCalendar}
                         className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 transition duration-300"
                     >
-                        Add to Calendar
+                        Download to Calendar
                     </button>
                 )}
                 {!viewingShared && (
@@ -1004,7 +1016,7 @@ const DeleteConfirmation = ({ onConfirm, onCancel }) => (
                 <button
                     onClick={onConfirm}
                     className="px-5 py-2 bg-red-600 text-white font-semibold rounded-full hover:bg-red-700 transition duration-300"
-                >
+                    >
                     Delete
                 </button>
             </div>
@@ -1018,4 +1030,5 @@ const Root = () => (
         <App />
     </FirebaseProvider>
 );
+
 export default Root;
